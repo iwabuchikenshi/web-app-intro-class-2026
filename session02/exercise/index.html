@@ -3,16 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>自己紹介ページ</title>
+    <title>Hello Rasu</title>
   </head>
   <body>
     <!-- ============================================
          実習2: 基本的なHTMLページ
          まずは以下のh1とpを自分の内容に書き換えてみよう
     ============================================ -->
-    <h1>はじめてのWebページ</h1>
-    <p>HTMLの勉強を始めました！</p>
 
+
+
+    <h1>Rasuの自己紹介</h1>
+    <header>
+    <p>こんにちは、Rasuです</p>
+    </header>
+    <main>
+    <section>
+    <ul>
+        <li>ゲーム</li>
+        <li>読書</li>
+    </ul>
+    </section>
+    
+    <section><h2>好きなサイト</h2>
+    <a href="https://www.youtube.com/?gl=JP&hl=ja">こちらがよく使うサイトです</a>
+
+    <img src="https://4.bp.blogspot.com/-lJvcMcl1bMo/VsGsNcaatHI/AAAAAAAA39g/XsJMvSAtF80/s800/kaisya_man.png" alt="画像" width="200" height="100">
+    </section>
+    </main>
     <!-- ============================================
          実習3: 自己紹介ページを作ろう
          以下のTODOコメントに従って、内容を追加してください
@@ -38,6 +56,9 @@
 
     <!-- TODO: aタグで好きなWebサイトへのリンクを1つ以上作ろう -->
     <!-- 例: <a href="https://github.com">GitHub</a> -->
+
+
+
 
     <!-- ============================================
          実習4: セマンティックタグで構造化しよう
@@ -89,5 +110,17 @@
         </form>
     </section>
     -->
+
+    <form>
+    <div>
+        <label for="name">名前:</label>
+        <input type="text" id="name" placeholder="名前入力">
+    </div>
+    <div>
+        <label for="email">メール:</label>
+        <input type="email" id="email" placeholder="???@mail.com">
+    </div>
+    <button type="submit">送信</button>
+</form>
   </body>
 </html>
