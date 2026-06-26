@@ -46,12 +46,11 @@ async function addTodo() {
 // -----------------------------------------------------
 async function toggleTodo(id, currentDone) {
   try {
-    // ヒント: PUTリクエストを送信
-    //   await fetch(`/todos/${id}`, {
-    //     method: "PUT",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ done: !currentDone }),
-    //   });
+await fetch(`/todos/${id}`, {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ done: !done })
+});
 
     await loadTodos();
   } catch (error) {
@@ -64,11 +63,7 @@ async function toggleTodo(id, currentDone) {
 // -----------------------------------------------------
 async function deleteTodo(id) {
   try {
-    // ヒント: DELETEリクエストを送信
-    //   await fetch(`/todos/${id}`, {
-    //     method: "DELETE",
-    //   });
-
+ await fetch(`/todos/${id}`, { method: "DELETE" });
     await loadTodos();
   } catch (error) {
     console.error("TODO削除エラー:", error);
