@@ -1,31 +1,16 @@
 /**
- * ほしいものリスト App JavaScript - 完成版
- * 第8回: セキュリティの基礎 & 総仕上げ
- *
- * 【このファイルの役割】
- * ブラウザの画面（HTML）と、バックエンド（main.py）の橋渡しをする。
- *
- * 【全体の流れ】
- * 1. ページが開かれる → loadItems() でサーバーからほしいもの一覧を取得
- * 2. renderItems() が、取得したデータを画面のリストとして描画する
- * 3. ユーザーが「追加・チェック・削除」を操作する
- *    → 対応する関数がサーバーに変更を送る（fetch）
- *    → 最後にもう一度 loadItems() して、最新の状態を画面に反映する
- *
- * ※ fetch はサーバーと通信する命令。通信は時間がかかるので、
- * async / await を使って「結果が返ってくるまで待つ」書き方をしている。
+ * Wantapp JavaScript
+ * 欲しいものリスト + 値段 + 入手ボタン対応版
  */
 
-// サーバー側のAPIのアドレス
-// バックエンド側はそのまま使うので、URLは /todos のままにする
 const API_URL = "/todos";
 
 // ============================================================
-// ほしいもの操作（CRUD）
+// 欲しいもの操作
 // ============================================================
 
 /**
- * ほしいもの一覧を取得して表示する
+ * 欲しいもの一覧を取得して表示する
  */
 async function loadItems() {
   try {
@@ -33,7 +18,7 @@ async function loadItems() {
 
     if (!response.ok) {
       const error = await response.json();
-      showError(error.detail || "ほしいものリストの取得に失敗しました");
+      showError(error.detail || "欲しいものリストの取得に失敗しました");
       return;
     }
 
@@ -45,19 +30,32 @@ async function loadItems() {
 }
 
 /**
- * 新しいほしいものを追加する
+ * 新しい欲しいものを追加する
  */
 async function addItem() {
-  const input = document.getElementById("todo-input");
-  const title = input.value.trim();
+  const titleInput = document.getElementById("todo-input");
+  const priceInput = document.getElementById("price-input");
+
+  const title = titleInput.value.trim();
+  const price = Number(priceInput.value);
 
   if (title === "") {
-    showError("ほしいものを入力してください");
+    showError("欲しいものを入力してください");
     return;
   }
 
   if (title.length > 100) {
-    showError("ほしいものは100文字以内で入力してください");
+    showError("欲しいものは100文字以内で入力してください");
+    return;
+  }
+
+  if (priceInput.value === "") {
+    showError("値段を入力してください");
+    return;
+  }
+
+  if (price < 0) {
+    showError("値段は0円以上で入力してください");
     return;
   }
 
@@ -65,16 +63,18 @@ async function addItem() {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: title }),
+      body: JSON.stringify({ title: title, price: price }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      showError(error.detail || "ほしいものの追加に失敗しました");
+      showError(error.detail || "欲しいものの追加に失敗しました");
       return;
     }
 
-    input.value = "";
+    titleInput.value = "";
+    priceInput.value = "";
+
     await loadItems();
   } catch (error) {
     showError("通信エラーが発生しました");
@@ -82,8 +82,7 @@ async function addItem() {
 }
 
 /**
- * ほしいものの入手状態を切り替える
- * id: 対象の番号 / currentDone: いまの状態(true/false)
+ * 入手状態を切り替える
  */
 async function toggleItem(id, currentDone) {
   try {
@@ -95,7 +94,7 @@ async function toggleItem(id, currentDone) {
 
     if (!response.ok) {
       const error = await response.json();
-      showError(error.detail || "ほしいものの更新に失敗しました");
+      showError(error.detail || "欲しいものの更新に失敗しました");
       return;
     }
 
@@ -106,8 +105,7 @@ async function toggleItem(id, currentDone) {
 }
 
 /**
- * ほしいものを削除する
- * id: 削除したいほしいものの番号
+ * 欲しいものを削除する
  */
 async function deleteItem(id) {
   try {
@@ -117,7 +115,7 @@ async function deleteItem(id) {
 
     if (!response.ok) {
       const error = await response.json();
-      showError(error.detail || "ほしいものの削除に失敗しました");
+      showError(error.detail || "欲しいものの削除に失敗しました");
       return;
     }
 
@@ -132,7 +130,7 @@ async function deleteItem(id) {
 // ============================================================
 
 /**
- * ほしいものリストを描画する（XSS対策: createElement + textContent）
+ * 欲しいものリストを描画する
  */
 function renderItems(items) {
   const list = document.getElementById("todo-list");
@@ -142,29 +140,38 @@ function renderItems(items) {
     const li = document.createElement("li");
     li.className = "todo-item" + (item.done ? " done" : "");
 
-    const label = document.createElement("label");
-    label.className = "todo-label";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "todo-checkbox";
-    checkbox.checked = item.done;
-    checkbox.addEventListener("change", () => toggleItem(item.id, item.done));
+    const itemInfo = document.createElement("div");
+    itemInfo.className = "todo-label";
 
     const titleSpan = document.createElement("span");
     titleSpan.className = "todo-title";
     titleSpan.textContent = item.title;
 
-    label.appendChild(checkbox);
-    label.appendChild(titleSpan);
+    const priceSpan = document.createElement("span");
+    priceSpan.className = "todo-price";
+    priceSpan.textContent = `¥${Number(item.price).toLocaleString()}`;
+
+    itemInfo.appendChild(titleSpan);
+    itemInfo.appendChild(priceSpan);
+
+    const buttonArea = document.createElement("div");
+    buttonArea.className = "button-area";
+
+    const getBtn = document.createElement("button");
+    getBtn.className = "get-button";
+    getBtn.textContent = item.done ? "入手済み" : "入手";
+    getBtn.addEventListener("click", () => toggleItem(item.id, item.done));
 
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-button";
     deleteBtn.textContent = "削除";
     deleteBtn.addEventListener("click", () => deleteItem(item.id));
 
-    li.appendChild(label);
-    li.appendChild(deleteBtn);
+    buttonArea.appendChild(getBtn);
+    buttonArea.appendChild(deleteBtn);
+
+    li.appendChild(itemInfo);
+    li.appendChild(buttonArea);
 
     list.appendChild(li);
   });
@@ -193,5 +200,5 @@ document.getElementById("todo-form").addEventListener("submit", function (e) {
   addItem();
 });
 
-// ページ読み込み時に、まずほしいもの一覧を取得して表示する
+// ページ読み込み時に、まず欲しいもの一覧を取得して表示する
 loadItems();
